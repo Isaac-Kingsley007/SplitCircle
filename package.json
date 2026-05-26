@@ -1,0 +1,12 @@
+{
+  "name": "project_name",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev": "pnpm --parallel dev"
+  },
+  "packageManager": "pnpm@10.33.0"
+}
