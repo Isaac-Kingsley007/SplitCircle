@@ -138,6 +138,40 @@ router.get('/split/:splitId', async (req, res) => {
     });
 });
 
+router.get('/access-level/:splitId', async (req, res) => {
+    const userId = req.session.userId;
+
+    const validation = z.number().int().positive().safeParse(req.params.splitId);
+
+    if (!validation.success) {
+        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+    }
+
+    const splitId = validation.data;
+
+    const hasWrite = await hasWriteAccess(userId, splitId);
+
+    if(hasWrite){
+        return res.json({
+            success: true,
+            data: {
+                hasWrite,
+                hasRead: true
+            }
+        });
+    }
+
+    const hasRead = await hasReadAccess(userId, splitId);
+
+    res.json({
+        success: true,
+        data: {
+            hasWrite,
+            hasRead
+        }
+    });
+});
+
 router.post('/create-split', async (req, res) => {
     const userId = req.session.userId;
 
