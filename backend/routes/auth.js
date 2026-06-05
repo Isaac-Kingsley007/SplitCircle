@@ -84,3 +84,5 @@ router.post('/signout', (req, res) => {
         message: "Signed Out Successfully"
     });
 });
+
+export default router;
