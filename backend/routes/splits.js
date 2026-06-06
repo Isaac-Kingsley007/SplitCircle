@@ -1,7 +1,7 @@
 import { Router } from 'express'
-import sql from './db/db'
+import sql from '../db/db.js'
 import { z } from 'zod';
-import { hasWriteAccess, hasReadAccess } from './lib/hasAccess.js';
+import { hasWriteAccess, hasReadAccess } from '../lib/hasAccess.js';
 
 const router = Router()
 
@@ -10,34 +10,32 @@ router.get('/created-splits-data', async (req, res) => {
     const userId = req.session.userId;
 
     const values = await sql`
-    select 
-        a.split_id,
-        b.split_name,
-        a.num_expenses,
-        a.total_amount,
-        b.num_users
-    from (
+        with expense_details as (
+            select
+                e.split_id,
+                count(*) as num_expenses,
+                sum(e.expense_amount) as total_amount
+            from expenses e
+            group by e.split_id
+        ),
+        user_counts as (
+            select
+                u.split_id,
+                count(*) as num_users
+            from user_splits u
+            group by u.split_id
+        )
         select
-            e.split_id,
-            count(*) as num_expenses,
-            sum(e.expense_amount) as total_amount
-        from expenses e
-        join splits s on e.split_id = s.split_id
-        where s.created_by = ${userId} 
-        group by e.split_id
-    ) a join
-    (
-        select
-            u.split_id,
+            s.split_id,
             s.split_name,
-            count(*) as num_users
-        from user_splits u
-        join splits s on u.split_id = s.split_id
+            coalesce(ed.num_expenses, 0) as num_expenses,
+            coalesce(ed.total_amount, 0) as total_amount,
+            coalesce(uc.num_users, 0) as num_users
+        from splits s
+        left join expense_details ed on s.split_id = ed.split_id
+        left join user_counts uc on s.split_id = uc.split_id
         where s.created_by = ${userId}
-        group by u.split_id
-    ) b on a.split_id = b.split_id
-    order by a.split_id desc
-    ;
+        order by s.created_at desc;
     `;
 
     res.json({
@@ -50,45 +48,43 @@ router.get('/joined-splits-data', async (req, res) => {
 
     const userId = req.session.userId;
 
-    const values = await sql`   
+    const values = await sql`
         with joined_splits as (
             select
-                split_id
-            from user_splits 
-            where user_id = ${userId}
+                s.split_id,
+                s.split_name,
+                s.created_at
+            from splits s
+            join user_splits us on s.split_id = us.split_id
+            where us.user_id = ${userId}
         ),
-
         expense_details as (
             select
                 e.split_id,
                 count(*) as num_expenses,
                 sum(e.expense_amount) as total_amount
             from expenses e
-            join splits s on e.split_id = s.split_id
-            where s.split_id in (select split_id from joined_splits)
+            where e.split_id in (select split_id from joined_splits)
             group by e.split_id
         ),
-
         user_counts as (
             select
                 u.split_id,
-                s.split_name,
                 count(*) as num_users
             from user_splits u
-            join splits s on u.split_id = s.split_id
-            where s.split_id in (select split_id from joined_splits)
+            where u.split_id in (select split_id from joined_splits)
             group by u.split_id
         )
-
         select
-            ed.split_id,
-            uc.split_name,
-            ed.num_expenses,
-            ed.total_amount,
-            uc.num_users
-        from expense_details ed
-        join user_counts uc on ed.split_id = uc.split_id
-        order by ed.split_id desc
+            js.split_id,
+            js.split_name,
+            coalesce(ed.num_expenses, 0) as num_expenses,
+            coalesce(ed.total_amount, 0) as total_amount,
+            coalesce(uc.num_users, 0) as num_users
+        from joined_splits js
+        left join expense_details ed on js.split_id = ed.split_id
+        left join user_counts uc on js.split_id = uc.split_id
+        order by js.created_at desc;
     `
 
     res.json({
@@ -275,7 +271,7 @@ router.post('/add-expense', async (req, res) => {
 
 });
 
-router.update('/remove-user-from-split', async (req, res) => {
+router.patch('/remove-user-from-split', async (req, res) => {
     const userId = req.session.userId;
 
     const validation = z.object({
@@ -313,7 +309,7 @@ router.update('/remove-user-from-split', async (req, res) => {
 
 });
 
-router.update('/remove-expense', async (req, res) => {
+router.patch('/remove-expense', async (req, res) => {
     const userId = req.session.userId;
 
     const validation = z.object({
@@ -343,7 +339,7 @@ router.update('/remove-expense', async (req, res) => {
 
 });
 
-router.update('/leave-split', async (req, res) => {
+router.patch('/leave-split', async (req, res) => {
     const userId = req.session.userId;
 
     const validation = z.object({
