@@ -3,10 +3,14 @@ import sql from './db.js';
 await sql`
     CREATE TABLE IF NOT EXISTS users (
         user_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-        user_name VARCHAR(255) NOT NULL,
+        user_name VARCHAR(255) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
         created_at TIMESTAMPTZ DEFAULT NOW()
     );
+`
+
+await sql`
+    CREATE INDEX IF NOT EXISTS idx_users_user_name ON users(user_name);
 `
 
 await sql`
