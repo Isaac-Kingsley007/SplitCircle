@@ -1,4 +1,4 @@
-import sql from "../db/db";
+import sql from "../db/db.js";
 
 export async function hasWriteAccess(userId, splitId) {
     const access = await sql`

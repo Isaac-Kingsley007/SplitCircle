@@ -10,6 +10,9 @@ import pgSession from 'connect-pg-simple';
 
 import sql from './db/db.js';
 
+import authRoutes from './routes/auth.js';
+import splitRoutes from './routes/splits.js';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const PostgresStore = pgSession(session);
@@ -53,7 +56,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend JS server is running smoothly!' });
 });
 
-// All The App Routes Will Go Here
+app.use('/api/auth', authRoutes);
+app.use('/api/splits', splitRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
