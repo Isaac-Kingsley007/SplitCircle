@@ -99,7 +99,7 @@ router.get('/split/:splitId', async (req, res) => {
     const validation = z.number().int().positive().safeParse(req.params.splitId);
 
     if (!validation.success) {
-        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+        return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
     const splitId = validation.data;
@@ -140,7 +140,7 @@ router.get('/access-level/:splitId', async (req, res) => {
     const validation = z.number().int().positive().safeParse(req.params.splitId);
 
     if (!validation.success) {
-        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+        return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
     const splitId = validation.data;
@@ -176,7 +176,7 @@ router.post('/create-split', async (req, res) => {
     }).safeParse(req.body);
 
     if (!validation.success) {
-        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+        return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
     const { split_name } = validation.data;
@@ -201,7 +201,7 @@ router.post('/add-user-to-split', async (req, res) => {
     }).safeParse(req.body);
 
     if (!validation.success) {
-        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+        return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
     const { split_id, user_name } = validation.data;
@@ -250,7 +250,7 @@ router.post('/add-expense', async (req, res) => {
     }).safeParse(req.body);
 
     if (!validation.success) {
-        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+        return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
     const { split_id, expense_name, expense_amount } = validation.data;
@@ -280,7 +280,7 @@ router.patch('/remove-user-from-split', async (req, res) => {
     }).safeParse(req.body);
 
     if (!validation.success) {
-        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+        return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
     const { split_id, user_name } = validation.data;
@@ -318,7 +318,7 @@ router.patch('/remove-expense', async (req, res) => {
     }).safeParse(req.body);
 
     if (!validation.success) {
-        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+        return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
     const { split_id, expense_name } = validation.data;
@@ -347,7 +347,7 @@ router.patch('/leave-split', async (req, res) => {
     }).safeParse(req.body);
 
     if (!validation.success) {
-        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+        return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
     const { split_id } = validation.data;
@@ -376,7 +376,7 @@ router.delete('/delete-split', async (req, res) => {
     }).safeParse(req.body);
 
     if (!validation.success) {
-        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+        return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
     const { split_id } = validation.data;

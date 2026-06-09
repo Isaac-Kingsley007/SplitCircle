@@ -21,7 +21,7 @@ router.post('/signup', async (req, res) => {
     const validation = userNamePasswordSchema.safeParse(req.body);
 
     if (!validation.success) {
-        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+        return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
     const { user_name, password } = validation.data;
@@ -46,7 +46,7 @@ router.post('/signin', async (req, res) => {
     const validation = userNamePasswordSchema.safeParse(req.body);
 
     if (!validation.success) {
-        return res.status(400).json({success: false, error: validation.error.errors.map(e => e.message).join(', ') });
+        return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
     const { user_name, password } = validation.data;
