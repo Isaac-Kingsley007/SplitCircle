@@ -96,8 +96,7 @@ router.get('/joined-splits-data', async (req, res) => {
 router.get('/split/:splitId', async (req, res) => {
     const userId = req.session.userId;
     
-    const validation = z.number().int().positive().safeParse(req.params.splitId);
-
+    const validation = z.coerce.number().int().positive().safeParse(req.params.splitId);
     if (!validation.success) {
         return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
@@ -137,7 +136,7 @@ router.get('/split/:splitId', async (req, res) => {
 router.get('/access-level/:splitId', async (req, res) => {
     const userId = req.session.userId;
 
-    const validation = z.number().int().positive().safeParse(req.params.splitId);
+    const validation = z.coerce.number().int().positive().safeParse(req.params.splitId);
 
     if (!validation.success) {
         return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
@@ -224,7 +223,7 @@ router.post('/add-user-to-split', async (req, res) => {
     `;
 
     if (!canAdd[0].can_add) {
-        return res.status(400).json({ success: false, error: "Invalid split ID or username" });
+        return res.status(400).json({ success: false, error: "User Already Exists in Split" });
     }
 
     await sql`

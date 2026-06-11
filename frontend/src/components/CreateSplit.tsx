@@ -1,9 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { post } from '../lib/server';
 
 interface CreateSplitProps {
     onClose: () => void;
-    onCreated: () => void; // called when a new split is created so parent can refresh
+    onCreated: () => void;
 }
 
 export default function CreateSplit({ onClose, onCreated }: CreateSplitProps) {
@@ -11,7 +11,7 @@ export default function CreateSplit({ onClose, onCreated }: CreateSplitProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: SubmitEvent) => {
         e.preventDefault();
         setError('');
 
