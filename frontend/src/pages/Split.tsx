@@ -33,6 +33,9 @@ function Split() {
     const [error, setError] = useState<string>("");
     const [showAddExpense, setShowAddExpense] = useState(false);
     const [showAddUser, setShowAddUser] = useState(false);
+    const [splitName, setSplitName] = useState("");
+    const [totalAmount, setTotalAmount] = useState(0);
+    const [amountPerUser, setAmountPerUser] = useState(0);
 
     const loadSplitData = async () => {
         if (!split_id) {
@@ -51,15 +54,18 @@ function Split() {
 
             setExpenses(data.data.expenses ?? []);
             setUsers(data.data.users ?? []);
+            setSplitName(data.data.split_name ?? "");
+            setTotalAmount(getAmount(data.data.total_amount));
+            setAmountPerUser(getAmount(data.data.amount_per_user));
         } catch {
             setError("Unable to connect to the server.");
         }
     }
 
-    const totalAmount = expenses.reduce((total, expense) => {
-        return total + getAmount(expense.expense_amount);
-    }, 0);
-    const amountPerUser = users.length > 0 ? totalAmount / users.length : 0;
+    // const totalAmount = expenses.reduce((total, expense) => {
+    //     return total + getAmount(expense.expense_amount);
+    // }, 0);
+    // const amountPerUser = users.length > 0 ? totalAmount / users.length : 0;
 
     useEffect(() => {
         const access = async () => {
@@ -121,7 +127,7 @@ function Split() {
                 <header className="flex flex-col gap-5 rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/30 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">SplitApp</p>
-                        <h1 className="mt-3 text-3xl font-semibold">Split #{split_id}</h1>
+                        <h1 className="mt-3 text-3xl font-semibold">{splitName}</h1>
                         <p className="mt-2 text-sm text-slate-400">
                             {users.length} {users.length === 1 ? "user" : "users"} · {expenses.length} {expenses.length === 1 ? "expense" : "expenses"}
                         </p>
