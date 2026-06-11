@@ -8,6 +8,8 @@ import rateLimit from 'express-rate-limit';
 import session from 'express-session';
 import pgSession from 'connect-pg-simple';
 
+import authMiddleware from './middleware/auth.js';
+
 import sql from './db/db.js';
 
 import authRoutes from './routes/auth.js';
@@ -56,8 +58,10 @@ app.use(session({
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Backend JS server is running smoothly!' });
 });
-
 app.use('/api/auth', authRoutes);
+
+app.use(authMiddleware);
+
 app.use('/api/splits', splitRoutes);
 
 app.use((req, res) => {
