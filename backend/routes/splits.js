@@ -107,31 +107,32 @@ router.get('/split/:splitId', async (req, res) => {
         return res.status(403).json({ success: false, error: "You do not have access to this split" });
     }
 
-    const splitData = await sql`
-        select 
-            split_name,
-            (select coalesce(sum(expense_amount), 0) from expenses where split_id = ${splitId}) as total_amount,
-            round(coalesce((select sum(expense_amount) from expenses where split_id = ${splitId}) / nullif((select count(*) from user_splits where split_id = ${splitId}), 0), 0), 2) as amount_per_user
-        from splits 
-        where split_id = ${splitId}
-    `;
-
-    const expenses = await sql`
-        select
-            expense_name,
-            expense_amount
-        from expenses 
-        where split_id = ${splitId}
-        order by created_at desc;
-    `
-
-    const users = await sql`
-        select
-            u.user_name
-        from user_splits us
-        join users u on us.user_id = u.user_id
-        where us.split_id = ${splitId}
-        order by us.created_at;`;
+    const [splitData, expenses, users] = await Promise.all([
+        sql`
+            select 
+                split_name,
+                (select coalesce(sum(expense_amount), 0) from expenses where split_id = ${splitId}) as total_amount,
+                round(coalesce((select sum(expense_amount) from expenses where split_id = ${splitId}) / nullif((select count(*) from user_splits where split_id = ${splitId}), 0), 0), 2) as amount_per_user
+            from splits 
+            where split_id = ${splitId}
+        `,
+        sql`
+            select
+                expense_name,
+                expense_amount
+            from expenses 
+            where split_id = ${splitId}
+            order by created_at desc
+        `,
+        sql`
+            select
+                u.user_name
+            from user_splits us
+            join users u on us.user_id = u.user_id
+            where us.split_id = ${splitId}
+            order by us.created_at
+        `
+    ]);
 
     res.json({
         success: true,
