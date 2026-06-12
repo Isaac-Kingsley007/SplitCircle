@@ -27,7 +27,7 @@ export async function post(url: string, body: any): Promise<any> {
 
 export async function patch(url: string, body: any): Promise<any> {
     const res = await fetch(`${baseUrl}${url}`, {
-        method: 'PUT',
+        method: 'PATCH',
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',

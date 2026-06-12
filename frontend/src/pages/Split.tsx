@@ -3,6 +3,7 @@ import { get } from "../lib/server";
 import { useEffect, useState } from "react";
 import AddExpense from "../components/AddExpense";
 import AddUser from "../components/AddUser";
+import DeleteOrLeaveSplit from "../components/DeleteOrLeaveSplit";
 
 interface Expense {
     expense_name: string;
@@ -134,22 +135,26 @@ function Split() {
                     </div>
 
                     <div className="flex flex-wrap gap-3">
-                        <button
-                            type="button"
-                            onClick={() => setShowAddUser(true)}
-                            disabled={!hasWriteAccess}
-                            className="rounded-2xl border border-cyan-400/40 px-5 py-3 font-semibold text-cyan-200 transition hover:border-cyan-300 hover:text-cyan-100 disabled:cursor-not-allowed disabled:border-white/10 disabled:text-slate-500"
-                        >
-                            Add User
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setShowAddExpense(true)}
-                            disabled={!hasWriteAccess}
-                            className="rounded-2xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
-                        >
-                            Add Expense
-                        </button>
+                        {hasWriteAccess ? (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAddUser(true)}
+                                    className="rounded-2xl border border-cyan-400/40 px-5 py-3 font-semibold text-cyan-200 transition hover:border-cyan-300 hover:text-cyan-100"
+                                >
+                                    Add User
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAddExpense(true)}
+                                    className="rounded-2xl bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
+                                >
+                                    Add Expense
+                                </button>
+                            </>
+                        ) : null}
+
+                        <DeleteOrLeaveSplit splitId={split_id!} hasWriteAccess={hasWriteAccess} />
                     </div>
                 </header>
 
