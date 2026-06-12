@@ -63,11 +63,6 @@ function Split() {
         }
     }
 
-    // const totalAmount = expenses.reduce((total, expense) => {
-    //     return total + getAmount(expense.expense_amount);
-    // }, 0);
-    // const amountPerUser = users.length > 0 ? totalAmount / users.length : 0;
-
     useEffect(() => {
         const access = async () => {
             setLoading(true);

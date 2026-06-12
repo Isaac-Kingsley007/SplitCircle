@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { patch, del } from '../lib/server';
 
 interface DeleteOrLeaveSplitProps {
     splitId: number | string;
     hasWriteAccess: boolean;
 }
-
-const API_BASE_URL = import.meta.env.VITE_BASE_URL ?? 'http://localhost:3000/api';
 
 export default function DeleteOrLeaveSplit({ splitId, hasWriteAccess }: DeleteOrLeaveSplitProps) {
     const navigate = useNavigate();
@@ -25,21 +24,15 @@ export default function DeleteOrLeaveSplit({ splitId, hasWriteAccess }: DeleteOr
         setError('');
 
         try {
-            const response = await fetch(
-                `${API_BASE_URL}/splits/${hasWriteAccess ? 'delete-split' : 'leave-split'}`,
-                {
-                    method: hasWriteAccess ? 'DELETE' : 'PATCH',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ split_id: Number(splitId) }),
-                }
-            );
+            let data = null;
 
-            const data = await response.json();
+            if(hasWriteAccess){
+                data = await del('/splits/delete-split', { split_id: Number(splitId) });
+            } else {
+                data = await patch('/splits/leave-split', { split_id: Number(splitId) });
+            }
 
-            if (!response.ok || !data.success) {
+            if (!data.success) {
                 setError(data.error ?? data.message ?? 'Unable to complete action.');
                 return;
             }

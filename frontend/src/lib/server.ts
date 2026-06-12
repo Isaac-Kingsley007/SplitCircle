@@ -38,10 +38,14 @@ export async function patch(url: string, body: any): Promise<any> {
     return res.json();
 }
 
-export async function del (url: string): Promise<any> {
+export async function del (url: string, body: any): Promise<any> {
     const res = await fetch(`${baseUrl}${url}`, {
         method: 'DELETE',
         credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
     });
 
     return res.json();
