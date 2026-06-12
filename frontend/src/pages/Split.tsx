@@ -1,9 +1,11 @@
 import { Link, useParams } from "react-router";
-import { get } from "../lib/server";
+import { get, patch } from "../lib/server";
 import { useEffect, useState } from "react";
 import AddExpense from "../components/AddExpense";
 import AddUser from "../components/AddUser";
 import DeleteOrLeaveSplit from "../components/DeleteOrLeaveSplit";
+import ExpenseTile from "../components/ExpenseTile";
+import UserTile from "../components/UserTile";
 
 interface Expense {
     expense_name: string;
@@ -62,6 +64,42 @@ function Split() {
             setError("Unable to connect to the server.");
         }
     }
+
+    const handleRemoveExpense = async (expenseName: string) => {
+        if (!split_id) {
+            return;
+        }
+
+        const response = await patch('/splits/remove-expense', {
+            split_id: Number(split_id),
+            expense_name: expenseName,
+        });
+
+        if (!response.success) {
+            setError(response.error ?? response.message ?? 'Unable to remove expense.');
+            return;
+        }
+
+        await loadSplitData();
+    };
+
+    const handleRemoveUser = async (userName: string) => {
+        if (!split_id) {
+            return;
+        }
+
+        const response = await patch('/splits/remove-user-from-split', {
+            split_id: Number(split_id),
+            user_name: userName,
+        });
+
+        if (!response.success) {
+            setError(response.error ?? response.message ?? 'Unable to remove user.');
+            return;
+        }
+
+        await loadSplitData();
+    };
 
     useEffect(() => {
         const access = async () => {
@@ -130,6 +168,13 @@ function Split() {
                     </div>
 
                     <div className="flex flex-wrap gap-3">
+                        <Link
+                            to="/"
+                            className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-slate-200 transition hover:bg-white/10"
+                        >
+                            Home
+                        </Link>
+
                         {hasWriteAccess ? (
                             <>
                                 <button
@@ -159,7 +204,7 @@ function Split() {
                     </p>
                 ) : null}
 
-                <section className="grid gap-4 md:grid-cols-3">
+                <section className="grid gap-4 md:grid-cols-2">
                     <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-5">
                         <p className="text-sm font-medium uppercase tracking-wide text-slate-400">Total Amount</p>
                         <p className="mt-3 text-3xl font-bold text-cyan-300">{currency.format(totalAmount)}</p>
@@ -167,10 +212,6 @@ function Split() {
                     <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-5">
                         <p className="text-sm font-medium uppercase tracking-wide text-slate-400">Each User Pays</p>
                         <p className="mt-3 text-3xl font-bold text-cyan-300">{currency.format(amountPerUser)}</p>
-                    </div>
-                    <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-5">
-                        <p className="text-sm font-medium uppercase tracking-wide text-slate-400">Access</p>
-                        <p className="mt-3 text-3xl font-bold text-cyan-300">{hasWriteAccess ? "Write" : "Read"}</p>
                     </div>
                 </section>
 
@@ -186,12 +227,13 @@ function Split() {
                         {expenses.length > 0 ? (
                             <div className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10">
                                 {expenses.map((expense, index) => (
-                                    <div className="flex items-center justify-between gap-4 bg-slate-900/60 px-4 py-4" key={`${expense.expense_name}-${index}`}>
-                                        <p className="font-medium text-slate-100">{expense.expense_name}</p>
-                                        <p className="shrink-0 font-semibold text-cyan-300">
-                                            {currency.format(getAmount(expense.expense_amount))}
-                                        </p>
-                                    </div>
+                                    <ExpenseTile
+                                        key={`${expense.expense_name}-${index}`}
+                                        splitId={split_id!}
+                                        expense={expense}
+                                        canEdit={hasWriteAccess}
+                                        onRemove={handleRemoveExpense}
+                                    />
                                 ))}
                             </div>
                         ) : (
@@ -212,17 +254,13 @@ function Split() {
                         {users.length > 0 ? (
                             <div className="space-y-3">
                                 {users.map((user) => (
-                                    <div className="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-4" key={user.user_name}>
-                                        <div className="flex min-w-0 items-center gap-3">
-                                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-400/15 font-bold text-cyan-200">
-                                                {user.user_name.charAt(0).toUpperCase()}
-                                            </span>
-                                            <p className="truncate font-medium text-slate-100">{user.user_name}</p>
-                                        </div>
-                                        <p className="shrink-0 text-sm font-semibold text-cyan-300">
-                                            {currency.format(amountPerUser)}
-                                        </p>
-                                    </div>
+                                    <UserTile
+                                        key={user.user_name}
+                                        splitId={split_id!}
+                                        user={user}
+                                        canEdit={hasWriteAccess}
+                                        onRemove={handleRemoveUser}
+                                    />
                                 ))}
                             </div>
                         ) : (
