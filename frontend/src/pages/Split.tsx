@@ -182,9 +182,9 @@ function Split() {
 
                         {expenses.length > 0 ? (
                             <div className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10">
-                                {expenses.map((expense, index) => (
+                                {expenses.map((expense) => (
                                     <ExpenseTile
-                                        key={`${expense.expense_name}-${index}`}
+                                        key={expense.expense_id}
                                         splitId={split_id!}
                                         expense={expense}
                                         canEdit={hasWriteAccess}

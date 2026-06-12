@@ -7,6 +7,7 @@ export interface SplitCardValues {
 }
 
 export interface Expense {
+    expense_id: number;
     expense_name: string;
     expense_amount: number | string;
 }

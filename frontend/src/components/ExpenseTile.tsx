@@ -22,14 +22,14 @@ const getAmount = (amount: number | string) => {
 export default function ExpenseTile({ splitId, expense, canEdit, onRemove, setError }: ExpenseTileProps) {
 
     const handleRemoveExpense = async () => {
-        const expenseName = expense.expense_name;
-            if (!splitId || !expenseName) {
+        const expenseId = expense.expense_id;
+            if (!splitId || !expenseId) {
                 return;
             }
     
             const response = await patch('/splits/remove-expense', {
                 split_id: Number(splitId),
-                expense_name: expenseName,
+                expense_id: Number(expenseId),
             });
     
             if (!response.success) {

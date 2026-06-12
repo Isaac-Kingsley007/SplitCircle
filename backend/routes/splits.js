@@ -118,6 +118,7 @@ router.get('/split/:splitId', async (req, res) => {
         `,
         sql`
             select
+                expense_id,
                 expense_name,
                 expense_amount
             from expenses 
@@ -324,14 +325,14 @@ router.patch('/remove-expense', async (req, res) => {
 
     const validation = z.object({
         split_id: z.number().int().positive(),
-        expense_name: z.string().trim().min(1).max(255)
+        expense_id: z.number().int().positive()
     }).safeParse(req.body);
 
     if (!validation.success) {
         return res.status(400).json({success: false, error: validation.error.issues.map(e => e.message).join(', ') });
     }
 
-    const { split_id, expense_name } = validation.data;
+    const { split_id, expense_id } = validation.data;
 
     if (!await hasWriteAccess(userId, split_id)) {
         return res.status(403).json({ success: false, error: "You do not have access to this split" });
@@ -339,7 +340,7 @@ router.patch('/remove-expense', async (req, res) => {
 
     await sql`
         delete from expenses
-        where split_id = ${split_id} and expense_name = ${expense_name}
+        where split_id = ${split_id} and expense_id = ${expense_id}
     `
 
     res.json({
