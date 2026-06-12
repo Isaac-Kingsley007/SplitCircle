@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { post } from '../lib/server';
 
 interface AddExpenseProps {
@@ -13,7 +13,7 @@ export default function AddExpense({ splitId, onClose, onAdded }: AddExpenseProp
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: SubmitEvent) => {
         e.preventDefault();
         setError('');
 

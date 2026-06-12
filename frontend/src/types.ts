@@ -5,3 +5,12 @@ export interface SplitCardValues {
     total_amount: number;
     num_users: number;
 }
+
+export interface Expense {
+    expense_name: string;
+    expense_amount: number | string;
+}
+
+export interface SplitUser {
+    user_name: string;
+}

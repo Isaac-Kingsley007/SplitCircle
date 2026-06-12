@@ -1,20 +1,12 @@
 import { Link, useParams } from "react-router";
-import { get, patch } from "../lib/server";
+import { get } from "../lib/server";
 import { useEffect, useState } from "react";
 import AddExpense from "../components/AddExpense";
 import AddUser from "../components/AddUser";
 import DeleteOrLeaveSplit from "../components/DeleteOrLeaveSplit";
 import ExpenseTile from "../components/ExpenseTile";
 import UserTile from "../components/UserTile";
-
-interface Expense {
-    expense_name: string;
-    expense_amount: number | string;
-}
-
-interface SplitUser {
-    user_name: string;
-}
+import { type Expense, type SplitUser } from "../types";
 
 const currency = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -63,42 +55,6 @@ function Split() {
         } catch {
             setError("Unable to connect to the server.");
         }
-    }
-
-    const handleRemoveExpense = async (expenseName: string) => {
-        if (!split_id) {
-            return;
-        }
-
-        const response = await patch('/splits/remove-expense', {
-            split_id: Number(split_id),
-            expense_name: expenseName,
-        });
-
-        if (!response.success) {
-            setError(response.error ?? response.message ?? 'Unable to remove expense.');
-            return;
-        }
-
-        await loadSplitData();
-    };
-
-    const handleRemoveUser = async (userName: string) => {
-        if (!split_id) {
-            return;
-        }
-
-        const response = await patch('/splits/remove-user-from-split', {
-            split_id: Number(split_id),
-            user_name: userName,
-        });
-
-        if (!response.success) {
-            setError(response.error ?? response.message ?? 'Unable to remove user.');
-            return;
-        }
-
-        await loadSplitData();
     };
 
     useEffect(() => {
@@ -232,7 +188,8 @@ function Split() {
                                         splitId={split_id!}
                                         expense={expense}
                                         canEdit={hasWriteAccess}
-                                        onRemove={handleRemoveExpense}
+                                        onRemove={loadSplitData}
+                                        setError={setError}
                                     />
                                 ))}
                             </div>
@@ -259,7 +216,8 @@ function Split() {
                                         splitId={split_id!}
                                         user={user}
                                         canEdit={hasWriteAccess}
-                                        onRemove={handleRemoveUser}
+                                        onRemove={loadSplitData}
+                                        setError={setError}
                                     />
                                 ))}
                             </div>

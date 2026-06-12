@@ -1,11 +1,12 @@
+import { patch } from "../lib/server";
+import { type Expense } from "../types";
+
 interface ExpenseTileProps {
     splitId: number | string;
-    expense: {
-        expense_name: string;
-        expense_amount: number | string;
-    };
+    expense: Expense;
     canEdit: boolean;
-    onRemove: (expenseName: string) => Promise<void>;
+    onRemove: () => Promise<void>;
+    setError: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const currency = new Intl.NumberFormat('en-US', {
@@ -18,7 +19,27 @@ const getAmount = (amount: number | string) => {
     return Number.isFinite(parsedAmount) ? parsedAmount : 0;
 };
 
-export default function ExpenseTile({ expense, canEdit, onRemove }: ExpenseTileProps) {
+export default function ExpenseTile({ splitId, expense, canEdit, onRemove, setError }: ExpenseTileProps) {
+
+    const handleRemoveExpense = async () => {
+        const expenseName = expense.expense_name;
+            if (!splitId || !expenseName) {
+                return;
+            }
+    
+            const response = await patch('/splits/remove-expense', {
+                split_id: Number(splitId),
+                expense_name: expenseName,
+            });
+    
+            if (!response.success) {
+                setError(response.error ?? response.message ?? 'Unable to remove expense.');
+                return;
+            }
+    
+            await onRemove();
+        };
+
     return (
         <div className="flex items-center justify-between gap-4 bg-slate-900/60 px-4 py-4">
             <div>
@@ -29,7 +50,7 @@ export default function ExpenseTile({ expense, canEdit, onRemove }: ExpenseTileP
             {canEdit ? (
                 <button
                     type="button"
-                    onClick={() => void onRemove(expense.expense_name)}
+                    onClick={() => void handleRemoveExpense()}
                     className="rounded-xl border border-rose-400/30 px-3 py-2 text-sm font-semibold text-rose-200 transition hover:border-rose-300 hover:text-rose-100"
                 >
                     Remove
