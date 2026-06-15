@@ -4,24 +4,6 @@ SplitCircle is a full-stack web app for creating shared expense groups, adding f
 
 It is built with a React frontend, an Express backend, and PostgreSQL for persistent data.
 
-## Table of Contents
-
-- [About the App](#about-the-app)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Environment Variables](#environment-variables)
-- [Database Setup](#database-setup)
-- [Running the App](#running-the-app)
-- [Available Scripts](#available-scripts)
-- [How SplitCircle Works](#how-splitcircle-works)
-- [API Overview](#api-overview)
-- [Database Tables](#database-tables)
-- [Development Notes](#development-notes)
-- [Troubleshooting](#troubleshooting)
-- [Future Improvements](#future-improvements)
-
 ## About the App
 
 SplitCircle helps users manage expenses with friends or groups.
@@ -38,23 +20,6 @@ Typical use cases include:
 - Event expenses
 - Any situation where people need to divide costs equally
 
-## Features
-
-- User signup and signin
-- Session-based authentication
-- Create new expense splits
-- View splits created by the current user
-- View splits joined by the current user
-- Add existing users to a split
-- Add expenses with name and amount
-- View total split amount
-- View equal amount per user
-- Remove users from a split
-- Remove expenses from a split
-- Leave a joined split
-- Delete a split as the creator
-- Protected backend routes
-- PostgreSQL-backed sessions
 
 ## Tech Stack
 
@@ -71,68 +36,10 @@ Typical use cases include:
 - Node.js
 - Express
 - PostgreSQL
-- postgres.js
-- express-session
-- connect-pg-simple
-- bcryptjs
-- Zod
-- Helmet
-- CORS
-- Morgan
-- Compression
-- express-rate-limit
 
 ### Package Management
 
 - pnpm workspace
-
-## Project Structure
-
-```txt
-splitapp/
-  package.json
-  pnpm-workspace.yaml
-  pnpm-lock.yaml
-
-  backend/
-    app.js
-    package.json
-    db/
-      db.js
-      init.js
-    lib/
-      hasAccess.js
-    middleware/
-      auth.js
-    routes/
-      auth.js
-      splits.js
-
-  frontend/
-    package.json
-    vite.config.ts
-    index.html
-    src/
-      main.tsx
-      App.tsx
-      route.ts
-      types.ts
-      lib/
-        server.ts
-      pages/
-        SignIn.tsx
-        SignUp.tsx
-        Split.tsx
-      components/
-        AddExpense.tsx
-        AddUser.tsx
-        CreateSplit.tsx
-        DeleteOrLeaveSplit.tsx
-        ExpenseTile.tsx
-        Logout.tsx
-        SplitCard.tsx
-        UserTile.tsx
-```
 
 ## Prerequisites
 
@@ -151,45 +58,6 @@ pnpm --version
 
 ## Environment Variables
 
-Create a `.env` file inside the `backend` folder.
-
-```env
-DATABASE_URL=postgres://USER:PASSWORD@HOST:PORT/DATABASE
-SESSION_SECRET=replace_this_with_a_long_random_secret
-PORT=3000
-NODE_ENV=development
-```
-
-### Backend Variables
-
-| Variable | Required | Description |
-| --- | --- | --- |
-| `DATABASE_URL` | Yes | PostgreSQL connection string used by the backend. |
-| `SESSION_SECRET` | Yes | Secret used to sign session cookies. Use a long random value. |
-| `PORT` | No | Backend port. Defaults to `3000`. |
-| `NODE_ENV` | No | Use `development` locally and `production` in production. |
-
-The backend database client is currently configured with SSL verification in `backend/db/db.js`:
-
-```js
-ssl: "verify-full"
-```
-
-If you use a cloud PostgreSQL provider, this is usually expected. If you use a local PostgreSQL database without SSL, adjust the database configuration for your local environment.
-
-### Frontend Variables
-
-The frontend uses this default API URL:
-
-```txt
-http://localhost:3000/api
-```
-
-You can override it by creating a `.env` file inside the `frontend` folder:
-
-```env
-VITE_BASE_URL=http://localhost:3000/api
-```
 
 ## Database Setup
 
@@ -200,14 +68,6 @@ From the project root, run:
 ```bash
 pnpm --filter backend init-db
 ```
-
-This creates:
-
-- `users`
-- `splits`
-- `expenses`
-- `user_splits`
-- `session`
 
 ## Running the App
 
@@ -244,37 +104,6 @@ pnpm dev:backend
 pnpm dev:frontend
 ```
 
-## Available Scripts
-
-### Root Scripts
-
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Runs the workspace dev scripts in parallel. |
-| `pnpm dev:frontend` | Starts the Vite frontend. |
-| `pnpm dev:backend` | Starts the Express backend with nodemon. |
-
-### Backend Scripts
-
-Run these from the root with `pnpm --filter backend <script>`.
-
-| Command | Description |
-| --- | --- |
-| `pnpm --filter backend dev` | Starts the backend using nodemon. |
-| `pnpm --filter backend start` | Starts the backend using Node. |
-| `pnpm --filter backend init-db` | Creates the required database tables. |
-
-### Frontend Scripts
-
-Run these from the root with `pnpm --filter frontend <script>`.
-
-| Command | Description |
-| --- | --- |
-| `pnpm --filter frontend dev` | Starts the Vite development server. |
-| `pnpm --filter frontend build` | Type-checks and builds the frontend. |
-| `pnpm --filter frontend lint` | Runs ESLint. |
-| `pnpm --filter frontend preview` | Previews the production frontend build. |
-
 ## How SplitCircle Works
 
 ### Authentication Flow
@@ -282,12 +111,6 @@ Run these from the root with `pnpm --filter frontend <script>`.
 Users create an account with a username and password. Passwords are hashed with `bcryptjs` before being stored in PostgreSQL.
 
 After signin, the backend stores the logged-in user's ID in an Express session:
-
-```js
-req.session.userId = user.user_id;
-```
-
-The session is stored in PostgreSQL using `connect-pg-simple`, and the frontend sends requests with cookies enabled.
 
 ### Split Flow
 
@@ -309,21 +132,6 @@ SplitCircle uses two access levels:
 | Read access | Split creator and joined users | View split details. |
 | Write access | Split creator only | Add/remove users, add/remove expenses, delete the split. |
 
-The access helpers live in:
-
-```txt
-backend/lib/hasAccess.js
-```
-
-### Equal Split Calculation
-
-The backend calculates:
-
-```txt
-amount_per_user = total_expenses / number_of_users_in_split
-```
-
-The value is rounded to 2 decimal places. If no users are attached to the split yet, the amount per user is returned as `0`.
 
 ## API Overview
 
@@ -348,34 +156,6 @@ The backend API is served under:
 | `POST` | `/api/auth/signin` | Signs in a user and creates a session. |
 | `POST` | `/api/auth/signout` | Destroys the current session. |
 
-#### Signup Body
-
-```json
-{
-  "user_name": "john_doe",
-  "password": "password123"
-}
-```
-
-#### Signin Body
-
-```json
-{
-  "user_name": "john_doe",
-  "password": "password123"
-}
-```
-
-Username rules:
-
-- Minimum 5 characters
-- Maximum 255 characters
-- Letters, numbers, and underscores only
-
-Password rules:
-
-- Minimum 8 characters
-- Maximum 255 characters
 
 ### Split Routes
 
@@ -395,66 +175,6 @@ All split routes require authentication.
 | `PATCH` | `/api/splits/leave-split` | Removes the current user from a joined split. |
 | `DELETE` | `/api/splits/delete-split` | Deletes a split. |
 
-#### Create Split Body
-
-```json
-{
-  "split_name": "Weekend Trip"
-}
-```
-
-#### Add User Body
-
-```json
-{
-  "split_id": 1,
-  "user_name": "john_doe"
-}
-```
-
-#### Add Expense Body
-
-```json
-{
-  "split_id": 1,
-  "expense_name": "Dinner",
-  "expense_amount": 45.5
-}
-```
-
-#### Remove User Body
-
-```json
-{
-  "split_id": 1,
-  "user_name": "john_doe"
-}
-```
-
-#### Remove Expense Body
-
-```json
-{
-  "split_id": 1,
-  "expense_id": 10
-}
-```
-
-#### Leave Split Body
-
-```json
-{
-  "split_id": 1
-}
-```
-
-#### Delete Split Body
-
-```json
-{
-  "split_id": 1
-}
-```
 
 ## Database Tables
 
