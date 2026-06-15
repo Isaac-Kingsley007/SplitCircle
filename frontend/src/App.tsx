@@ -49,7 +49,7 @@ export default function App() {
         <div className="mb-8 rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl shadow-black/20 backdrop-blur">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.28em] text-cyan-300">SplitApp</p>
+              <p className="text-sm uppercase tracking-[0.28em] text-cyan-300">SplitCircle</p>
               <h2 className="mt-2 text-3xl font-semibold text-white">Your Splits</h2>
               <p className="mt-1 text-sm text-slate-400">Track created and joined splits from one place.</p>
             </div>

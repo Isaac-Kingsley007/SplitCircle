@@ -46,7 +46,7 @@ function Signup() {
         <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center px-4">
             <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/30 backdrop-blur">
                 <div className="mb-8 text-center">
-                    <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">SplitApp</p>
+                    <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">SplitCircle</p>
                     <h1 className="mt-3 text-3xl font-semibold">Create account</h1>
                     <p className="mt-2 text-sm text-slate-400">Create your account to start tracking shared expenses.</p>
                 </div>
