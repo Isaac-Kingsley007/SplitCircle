@@ -1,5 +1,5 @@
 
-const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000/api';
+const baseUrl = (import.meta.env.VITE_BASE_URL || 'http://localhost:3000/api').replace(/\/$/, '');
 
 export async function get(url: string): Promise<any> {
     const res = await fetch(`${baseUrl}${url}`, {
