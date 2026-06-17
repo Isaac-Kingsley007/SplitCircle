@@ -19,6 +19,24 @@ function requireEnv(name) {
     return value;
 }
 
+function parseBooleanEnv(name, defaultValue) {
+    const value = process.env[name]?.toLowerCase();
+
+    if (!value) {
+        return defaultValue;
+    }
+
+    if (['true', '1', 'yes'].includes(value)) {
+        return true;
+    }
+
+    if (['false', '0', 'no'].includes(value)) {
+        return false;
+    }
+
+    throw new Error(`${name} must be one of: true, false, 1, 0, yes, no`);
+}
+
 function resolvePort() {
     if (process.env.PORT) {
         return process.env.PORT;
@@ -49,6 +67,24 @@ function resolveDatabaseSsl() {
     throw new Error('DATABASE_SSL must be one of: true, false, require, disable, allow, prefer, verify-full');
 }
 
+function resolveSameSite(secureCookie) {
+    const value = process.env.SESSION_COOKIE_SAME_SITE?.toLowerCase();
+
+    if (!value) {
+        return secureCookie ? 'none' : 'lax';
+    }
+
+    if (!['lax', 'strict', 'none'].includes(value)) {
+        throw new Error('SESSION_COOKIE_SAME_SITE must be one of: lax, strict, none');
+    }
+
+    if (value === 'none' && !secureCookie) {
+        throw new Error('SESSION_COOKIE_SAME_SITE=none requires SESSION_COOKIE_SECURE=true');
+    }
+
+    return value;
+}
+
 const clientOrigins = parseCsv(process.env.CLIENT_ORIGIN);
 
 if (!clientOrigins.length && !isProduction) {
@@ -65,6 +101,8 @@ if (isProduction && sessionSecret.length < 32) {
     throw new Error('SESSION_SECRET must be at least 32 characters in production');
 }
 
+const sessionCookieSecure = parseBooleanEnv('SESSION_COOKIE_SECURE', process.env.RENDER === 'true');
+
 export const env = {
     NODE_ENV: process.env.NODE_ENV || 'development',
     PORT: resolvePort(),
@@ -73,5 +111,8 @@ export const env = {
     CLIENT_ORIGINS: clientOrigins,
     SESSION_SECRET: sessionSecret,
     SESSION_COOKIE_NAME: process.env.SESSION_COOKIE_NAME || 'splitapp.sid',
+    SESSION_COOKIE_SECURE: sessionCookieSecure,
+    SESSION_COOKIE_SAME_SITE: resolveSameSite(sessionCookieSecure),
+    TRUST_PROXY: parseBooleanEnv('TRUST_PROXY', process.env.RENDER === 'true'),
     isProduction
 };

@@ -20,7 +20,7 @@ const app = express();
 const PORT = env.PORT;
 const PostgresStore = pgSession(session);
 
-if (env.isProduction) {
+if (env.TRUST_PROXY) {
   app.set('trust proxy', 1);
 }
 
@@ -63,6 +63,7 @@ app.use(session({
     },
     tableName: 'session'
   }),
+  proxy: env.TRUST_PROXY,
   secret: env.SESSION_SECRET,
   resave: false,                 
   saveUninitialized: false,      
