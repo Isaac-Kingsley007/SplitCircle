@@ -45,15 +45,24 @@ async function initDb() {
 
         await sql`
             CREATE TABLE IF NOT EXISTS session (
-            "sid" varchar NOT NULL COLLATE "default",
-            sess json NOT NULL,
-            expire timestamp(6) NOT NULL
+                "sid" varchar NOT NULL COLLATE "default",
+                sess json NOT NULL,
+                expire timestamp(6) NOT NULL
             )
             WITH (OIDS=FALSE);
         `;
 
         await sql`
-            ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") 
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1
+                    FROM pg_constraint
+                    WHERE conname = 'session_pkey'
+                ) THEN
+                    ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid");
+                END IF;
+            END $$;
         `;
 
         await sql`
@@ -67,9 +76,19 @@ async function initDb() {
     }
 }
 
-initDb()
-    .then(() => process.exit(0))
-    .catch(() => process.exit(1))
-    .finally(() => sql.end());
+async function runInitDb() {
+    let exitCode = 0;
+
+    try {
+        await initDb();
+    } catch {
+        exitCode = 1;
+    } finally {
+        await sql.end();
+        process.exit(exitCode);
+    }
+}
+
+runInitDb();
 
 export default initDb;

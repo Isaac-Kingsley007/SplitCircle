@@ -1,8 +1,8 @@
 import postgres from 'postgres';
-import 'dotenv/config';
+import { env } from '../config/env.js';
 
-const sql = postgres(process.env.DATABASE_URL, {
-    ssl: "verify-full"
+const sql = postgres(env.DATABASE_URL, {
+    ssl: env.DATABASE_SSL
 });
 
 export default sql;

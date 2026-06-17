@@ -2,6 +2,7 @@ import { Router } from 'express';
 import sql from '../db/db.js';
 import bcrypt from 'bcryptjs';
 import * as z from "zod"; 
+import { clearSessionCookieOptions, sessionCookieName } from '../config/session.js';
 
 const router = Router();
 
@@ -42,7 +43,7 @@ router.post('/signup', async (req, res) => {
     });
 });
 
-router.post('/signin', async (req, res) => {
+router.post('/signin', async (req, res, next) => {
     const validation = userNamePasswordSchema.safeParse(req.body);
 
     if (!validation.success) {
@@ -63,25 +64,38 @@ router.post('/signin', async (req, res) => {
         return res.status(400).json({ error: 'Invalid username or password' });
     }
 
-    req.session.userId = user.user_id;
+    req.session.regenerate(err => {
+        if (err) {
+            return next(err);
+        }
 
-    return res.json({
-        success: true,
-        message: "Signed In Successfully"
-    })
+        req.session.userId = user.user_id;
+
+        req.session.save(saveErr => {
+            if (saveErr) {
+                return next(saveErr);
+            }
+
+            return res.json({
+                success: true,
+                message: "Signed In Successfully"
+            });
+        });
+    });
 });
 
-router.post('/signout', (req, res) => {
+router.post('/signout', (req, res, next) => {
     req.session.destroy(err => {
         if(err){
-            throw err;
+            return next(err);
         }
-        res.clearCookie('connect.sid');
-    });
 
-    return res.json({
-        success: true,
-        message: "Signed Out Successfully"
+        res.clearCookie(sessionCookieName, clearSessionCookieOptions);
+
+        return res.json({
+            success: true,
+            message: "Signed Out Successfully"
+        });
     });
 });
 
