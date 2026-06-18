@@ -58,3 +58,5 @@ pnpm-debug.log*
 .stylelintcache
 .turbo/
 .cache/
+
+.env.production
